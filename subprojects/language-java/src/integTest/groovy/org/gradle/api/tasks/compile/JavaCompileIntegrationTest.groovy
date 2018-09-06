@@ -844,6 +844,7 @@ class JavaCompileIntegrationTest extends AbstractPluginIntegrationTest {
                 } else if (project.hasProperty("java8")) {
                     options.bootstrapClasspath = files("$jdk8bootClasspath")
                 } 
+                options.fork = true
             }
         """
         file('src/main/java/Main.java') << """
@@ -859,18 +860,12 @@ class JavaCompileIntegrationTest extends AbstractPluginIntegrationTest {
         """
 
         expect:
-        executer.withJavaHome jdk8.javaHome
         succeeds "clean", "compileJava"
 
-        executer.withJavaHome jdk8.javaHome
         executer.withStacktraceDisabled()
         fails "-Pjava7", "clean", "compileJava"
         failure.assertHasErrorOutput "Main.java:8: error: cannot find symbol"
 
-        executer.withJavaHome jdk8.javaHome
-        succeeds "-Pjava8", "clean", "compileJava"
-
-        executer.withJavaHome jdk7.javaHome
         succeeds "-Pjava8", "clean", "compileJava"
     }
 
